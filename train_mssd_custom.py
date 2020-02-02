@@ -217,7 +217,7 @@ def train():
         return
     elif args.dataset == 'CUSTOM':
         dataset = CustomDetection(CUSTOMroot, train_sets, preproc(
-            img_dim, rgb_means, p))
+            img_dim, rgb_means, p), CustomAnnotationTransform())
     else:
         print('Only VOC and COCO are supported now!')
         return
