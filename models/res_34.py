@@ -486,7 +486,7 @@ def vgg(cfg, i, batch_norm=False):
     conv12 = nn.Conv2d(1280, 512, kernel_size=1)
     conv13 = nn.Conv2d(768, 512, kernel_size=1)
 
-    # de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
     de3_5 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1)
     de3_5_0 = nn.BatchNorm2d(512)
     de3_5_1 = torch.nn.Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1))
@@ -499,7 +499,8 @@ def vgg(cfg, i, batch_norm=False):
     de5_10_2 = nn.BatchNorm2d(128)
     de5_10_3 = nn.ReLU(inplace=True)
 
-    de10_19 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    # de10_19 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    de10_19 = torch.nn.Conv2d(512, 512, kernel_size=(1, 1), stride=(1, 1))
     de10_19_0 = nn.BatchNorm2d(512)
     de10_19_1 = torch.nn.Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1))
     de10_19_2 = nn.BatchNorm2d(128)
