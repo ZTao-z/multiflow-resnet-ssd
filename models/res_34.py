@@ -154,8 +154,8 @@ class SSD(nn.Module):
         self.L2Norm = L2Norm(256, 20)
         self.L2Norm2 = L2Norm(512, 20)
 
-        self.upsample_300 = torch.nn.UpsamplingBilinear2d(size=(20,20))
-        self.upsample_512 = torch.nn.UpsamplingBilinear2d(size=(33,33))
+        self.upsample_300 = torch.nn.UpsamplingBilinear2d(size=(19,19))
+        self.upsample_512 = torch.nn.UpsamplingBilinear2d(size=(32,32))
 
         self.vgg1 = nn.ModuleList(base[0])
         self.vgg2 = nn.ModuleList(base[1])
@@ -500,7 +500,7 @@ def vgg(cfg, i, batch_norm=False):
     de5_10_3 = nn.ReLU(inplace=True)
 
     # de10_19 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
-    de10_19 = torch.nn.Conv2d(512, 512, kernel_size=(1, 1), stride=(1, 1))
+    de10_19 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
     de10_19_0 = nn.BatchNorm2d(512)
     de10_19_1 = torch.nn.Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1))
     de10_19_2 = nn.BatchNorm2d(128)
