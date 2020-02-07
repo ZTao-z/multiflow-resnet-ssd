@@ -196,9 +196,6 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr,
 #                      momentum=args.momentum, weight_decay=args.weight_decay)
 
 criterion = MultiBoxLoss(num_classes, 0.5, True, 0, True, 3, 0.5, False)
-priorbox = PriorBox(cfg)
-priors = Variable(priorbox.forward(), volatile=True)
-
 
 def train():
     net.train()
@@ -219,8 +216,6 @@ def train():
     elif args.dataset == 'CUSTOM':
         dataset = CustomDetection(CUSTOMroot, train_sets, preproc(
             img_dim, rgb_means, p), CustomAnnotationTransform())
-        dataset_400 = CustomDetection(CUSTOMroot, train_sets, preproc(
-            400, rgb_means, p), CustomAnnotationTransform())
         dataset_512 = CustomDetection(CUSTOMroot, train_sets, preproc(
             512, rgb_means, p), CustomAnnotationTransform())
     else:
@@ -246,9 +241,12 @@ def train():
     for iteration in range(start_iter, max_iter):
         if iteration % epoch_size == 0:
             # create batch iterator
-            batch_iterator = iter(data.DataLoader((dataset, dataset_400, dataset_512)[random.randint(0,2)], batch_size,
+            image_size = ('300', '512')[random.randint(0,1)]
+            batch_iterator = iter(data.DataLoader((dataset, dataset_512)[image_size == '512'], batch_size,
                                                   shuffle=True, num_workers=args.num_workers,
                                                   collate_fn=detection_collate))
+            priorbox = PriorBox((VOC_300_2, VOC_512)[image_size == '512'])
+            priors = Variable(priorbox.forward(), volatile=True)
             loc_loss = 0
             conf_loss = 0
             #if (epoch % 10 == 0 and epoch > 0) or (epoch % 5 == 0 and epoch > 200):
@@ -262,7 +260,6 @@ def train():
 
         # load train data
         images, targets = next(batch_iterator)
-        image_size = images[0].size()[1]
 
         # print(np.sum([torch.sum(anno[:,-1] == 2) for anno in targets]))
 
