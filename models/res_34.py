@@ -154,10 +154,10 @@ class SSD(nn.Module):
         self.L2Norm = L2Norm(256, 20)
         self.L2Norm2 = L2Norm(512, 20)
 
-        self.upsample_300_10_19 = torch.nn.UpsamplingBilinear2d(size=(19,19))
-        self.upsample_300_3_5 = torch.nn.UpsamplingBilinear2d(size=(5,5))
-        self.upsample_512_16_32= torch.nn.UpsamplingBilinear2d(size=(32,32))
-        self.upsample_512_4_8= torch.nn.UpsamplingBilinear2d(size=(8,8))
+        self.upsample_300_10_19 = torch.nn.Upsample(size=(19,19), mode='bilinear', align_corners=True)
+        self.upsample_300_3_5 = torch.nn.Upsample(size=(5,5), mode='bilinear', align_corners=True)
+        self.upsample_512_16_32= torch.nn.Upsample(size=(32,32), mode='bilinear', align_corners=True)
+        self.upsample_512_4_8= torch.nn.Upsample(size=(8,8), mode='bilinear', align_corners=True)
 
         self.vgg1 = nn.ModuleList(base[0])
         self.vgg2 = nn.ModuleList(base[1])
@@ -394,13 +394,14 @@ class SSD(nn.Module):
                 for i in range(len(self.de1)):
                     xde5 = self.de1[i](xde5)
                 xde5 = xde5 + ds5
-                s5 = torch.cat((s5, ds5,xde5), 1)
+                s5 = torch.cat((s5, ds5, xde5), 1)
 
                 x5 = self.extras[29](s5)
                 s5 = self.extras[30](x5)
                 s5 = self.extras[31](s5)
                 sources.append(s5)
 
+                print(x.size(), ds3.size())
                 s3 = torch.cat((x, ds3), 1)
                 x3 = self.extras[32](s3)
 
