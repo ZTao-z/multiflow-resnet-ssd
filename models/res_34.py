@@ -272,6 +272,7 @@ class SSD(nn.Module):
         res38 = x
 
         s = self.L2Norm(res38)
+        # multi_flow_1
         s2 = s
         for k in range(len(self.vgg2)):
             s2 = self.vgg2[k](s2)
@@ -282,17 +283,19 @@ class SSD(nn.Module):
         #s6 = s
         #for k in range(len(self.vgg4)):
             #s6 = self.vgg4[k](s6)
-
+        # multi_flow_2
         s8 = s
         for k in range(len(self.vgg5)):
             s8 = self.vgg5[k](s8)
-
+        # origin_flow
         for k in range(len(self.vgg6)):
             s = self.vgg6[k](s)
-
+        # concat
         s = torch.cat((s, s2, s8), 1)
+        # conv
         for k in range(len(self.vgg7)):
             s = self.vgg7[k](s)
+        # multi_flow_output
         s38 = self.L2Norm2(s)
         # sources.append(s)
         ds19 = self.ds38_19(s38)
@@ -659,4 +662,4 @@ def build_net(phase, size=300, num_classes=21):
     base_, extras_, head_ = multibox(vgg(base[str(size)], 3),
                                      add_extras(extras[str(size)], 1024),
                                      mbox[str(size)], num_classes)
-    return SSD(phase, size, base_, extras_, head_, num_classes,resnet18())
+    return SSD(phase, size, base_, extras_, head_, num_classes, resnet18())

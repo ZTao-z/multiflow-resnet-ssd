@@ -22,6 +22,7 @@ from layers.functions import PriorBox
 import os
 #os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 import time
+import random
 
 parser = argparse.ArgumentParser(
     description='Receptive Field Block Net Training')
@@ -138,7 +139,7 @@ if args.resume_net == None:
         if isinstance(m, nn.Conv2d):
             xavier(m.weight.data)
     print('Initializing weights...')
-# initialize newly added layers' weights with kaiming_normal method
+    # initialize newly added layers' weights with kaiming_normal method
     net.vgg1.apply(weights_init)
     net.vgg2.apply(weights_init)
     #net.vgg3.apply(weights_init)
@@ -218,6 +219,10 @@ def train():
     elif args.dataset == 'CUSTOM':
         dataset = CustomDetection(CUSTOMroot, train_sets, preproc(
             img_dim, rgb_means, p), CustomAnnotationTransform())
+        dataset_400 = CustomDetection(CUSTOMroot, train_sets, preproc(
+            400, rgb_means, p), CustomAnnotationTransform())
+        dataset_512 = CustomDetection(CUSTOMroot, train_sets, preproc(
+            512, rgb_means, p), CustomAnnotationTransform())
     else:
         print('Only VOC and COCO are supported now!')
         return
@@ -237,10 +242,11 @@ def train():
         start_iter = 0
 
     lr = args.lr
+    image_size = 0
     for iteration in range(start_iter, max_iter):
         if iteration % epoch_size == 0:
             # create batch iterator
-            batch_iterator = iter(data.DataLoader(dataset, batch_size,
+            batch_iterator = iter(data.DataLoader((dataset, dataset_400, dataset_512)[random.randint(0,2)], batch_size,
                                                   shuffle=True, num_workers=args.num_workers,
                                                   collate_fn=detection_collate))
             loc_loss = 0
@@ -256,6 +262,7 @@ def train():
 
         # load train data
         images, targets = next(batch_iterator)
+        image_size = images[0].size()[1]
 
         # print(np.sum([torch.sum(anno[:,-1] == 2) for anno in targets]))
 
@@ -281,7 +288,7 @@ def train():
         conf_loss += loss_c.data[0]
 
         if iteration % 100 == 0:
-            print('Epoch:' + repr(epoch) + ' || epochiter: ' + repr(iteration % epoch_size) + '/' + repr(epoch_size)
+            print('Epoch:' + repr(epoch) + ' || image-size:' + repr(image_size) + ' || epochiter: ' + repr(iteration % epoch_size) + '/' + repr(epoch_size)
                   + '|| Totel iter ' +
                   repr(iteration) + ' || L: %.4f C: %.4f||' % (
                       loss_l.data[0], loss_c.data[0]) +
