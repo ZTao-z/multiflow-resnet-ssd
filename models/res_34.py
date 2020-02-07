@@ -154,8 +154,10 @@ class SSD(nn.Module):
         self.L2Norm = L2Norm(256, 20)
         self.L2Norm2 = L2Norm(512, 20)
 
-        self.upsample_300 = torch.nn.UpsamplingBilinear2d(size=(19,19))
-        self.upsample_512 = torch.nn.UpsamplingBilinear2d(size=(32,32))
+        self.upsample_300_10_19 = torch.nn.UpsamplingBilinear2d(size=(19,19))
+        self.upsample_300_3_5 = torch.nn.UpsamplingBilinear2d(size=(5,5))
+        self.upsample_512_16_32= torch.nn.UpsamplingBilinear2d(size=(32,32))
+        self.upsample_512_4_8= torch.nn.UpsamplingBilinear2d(size=(8,8))
 
         self.vgg1 = nn.ModuleList(base[0])
         self.vgg2 = nn.ModuleList(base[1])
@@ -345,9 +347,9 @@ class SSD(nn.Module):
                 ds5 = self.ds10_5(x)
                 xde19 = x
                 if x.size()[2] == 10:
-                    xde19 = self.upsample_300(xde19)
+                    xde19 = self.upsample_300_10_19(xde19)
                 else:
-                    xde19 = self.upsample_512(xde19)
+                    xde19 = self.upsample_512_16_32(xde19)
                 for i in range(len(self.de3)):
                     xde19 = self.de3[i](xde19)
                 xde19 = ds19 + xde19
@@ -385,6 +387,10 @@ class SSD(nn.Module):
             elif (k == 20):
 
                 xde5 = x
+                if x.size()[2] == 3:
+                    xde5 = self.upsample_300_3_5(xde5)
+                else:
+                    xde5 = self.upsample_512_4_8(xde5)
                 for i in range(len(self.de1)):
                     xde5 = self.de1[i](xde5)
                 xde5 = xde5 + ds5
@@ -486,8 +492,8 @@ def vgg(cfg, i, batch_norm=False):
     conv12 = nn.Conv2d(1280, 512, kernel_size=1)
     conv13 = nn.Conv2d(768, 512, kernel_size=1)
 
-    de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
-    de3_5 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1)
+    # de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    de3_5 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
     de3_5_0 = nn.BatchNorm2d(512)
     de3_5_1 = torch.nn.Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1))
     de3_5_2 = nn.BatchNorm2d(128)
