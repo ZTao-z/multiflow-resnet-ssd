@@ -158,7 +158,8 @@ class SSD(nn.Module):
         self.upsample_300_3_5 = torch.nn.UpsamplingBilinear2d(size=(5,5))
         self.upsample_512_16_32= torch.nn.UpsamplingBilinear2d(size=(32,32))
         self.upsample_512_4_8= torch.nn.UpsamplingBilinear2d(size=(8,8))
-
+        self.downsample_512_8_6 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1)
+        
         self.vgg1 = nn.ModuleList(base[0])
         self.vgg2 = nn.ModuleList(base[1])
         #self.vgg3 = nn.ModuleList(base[2])
@@ -403,7 +404,7 @@ class SSD(nn.Module):
 
                 print(x.size(), ds3.size())
                 if x.size()[2] == 6:
-                    x = torch.nn.functional.interpolate(x, size=(4,4), mode='bilinear')
+                    x = self.downsample_512_8_6(x)
                 s3 = torch.cat((x, ds3), 1)
                 x3 = self.extras[32](s3)
 
