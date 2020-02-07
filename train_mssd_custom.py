@@ -140,7 +140,6 @@ if args.resume_net == None:
             xavier(m.weight.data)
     print('Initializing weights...')
     # initialize newly added layers' weights with kaiming_normal method
-    net.downsample_512_8_6.apply(weights_init)
     net.vgg1.apply(weights_init)
     net.vgg2.apply(weights_init)
     #net.vgg3.apply(weights_init)
