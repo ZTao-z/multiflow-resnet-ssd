@@ -136,8 +136,8 @@ class SSD(nn.Module):
         self.phase = phase
         self.num_classes = num_classes
         self.cfg = VOC_300_2
-        self.priorbox = PriorBox(self.cfg)
-        self.priors = Variable(self.priorbox.forward(), volatile=True)
+        # self.priorbox = PriorBox(self.cfg)
+        # self.priors = Variable(self.priorbox.forward(), volatile=True)
         self.size = size
 
         self.conv1 = resnet18.conv1
@@ -153,6 +153,9 @@ class SSD(nn.Module):
         # Layer learns to scale the l2 normalized features from conv4_3
         self.L2Norm = L2Norm(256, 20)
         self.L2Norm2 = L2Norm(512, 20)
+
+        self.upsample_300 = torch.nn.UpsamplingBilinear2d(size=(20,20))
+        self.upsample_512 = torch.nn.UpsamplingBilinear2d(size=(33,33))
 
         self.vgg1 = nn.ModuleList(base[0])
         self.vgg2 = nn.ModuleList(base[1])
@@ -313,7 +316,7 @@ class SSD(nn.Module):
         for k in range(len(self.de4)):
             xde38 = self.de4[k](xde38)
 
-        s38_1=self.con_press38(s38)
+        s38_1 = self.con_press38(s38)
         # sources.append(s38)
 
         x19 = self.extras[21](x)
@@ -334,13 +337,17 @@ class SSD(nn.Module):
             if (k == 6):
                 #s38_2 = self.de10_38(x)
                 #s38_2=s38_1+s38_2
-                s38=torch.cat((s38,s38_1,xde38),1)
+                s38 = torch.cat((s38, s38_1, xde38), 1)
                 for i in range(len(self.vgg8)):
                     s38 = self.vgg8[i](s38)
 
                 sources.append(s38)
                 ds5 = self.ds10_5(x)
                 xde19 = x
+                if x.size()[2] == 10:
+                    xde19 = self.upsample_300(xde19)
+                else:
+                    xde19 = self.upsample_512(xde19)
                 for i in range(len(self.de3)):
                     xde19 = self.de3[i](xde19)
                 xde19 = ds19 + xde19
@@ -350,7 +357,7 @@ class SSD(nn.Module):
                 s19 = self.extras[25](s19)
                 sources.append(s19)
 
-                s10=x
+                s10 = x
 
                 # sources.append(x10)
             elif (k == 13):
@@ -364,7 +371,7 @@ class SSD(nn.Module):
 
                 for i in range(len(self.de2)):
                     xde10 = self.de2[i](xde10)
-                xde10=xde10+ds10
+                xde10 = xde10 + ds10
                 s10 = torch.cat((s10, ds10,xde10), 1)
                 x10 = self.extras[26](s10)
                 s10 = self.extras[27](x10)
@@ -380,7 +387,7 @@ class SSD(nn.Module):
                 xde5 = x
                 for i in range(len(self.de1)):
                     xde5 = self.de1[i](xde5)
-                xde5=xde5+ds5
+                xde5 = xde5 + ds5
                 s5 = torch.cat((s5, ds5,xde5), 1)
 
                 x5 = self.extras[29](s5)
@@ -479,7 +486,8 @@ def vgg(cfg, i, batch_norm=False):
     conv12 = nn.Conv2d(1280, 512, kernel_size=1)
     conv13 = nn.Conv2d(768, 512, kernel_size=1)
 
-    de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    # de3_5 = torch.nn.ConvTranspose2d(512, 512, kernel_size=3, stride=2, padding=1, output_padding=0)
+    de3_5 = torch.nn.Conv2d(512, 512, kernel_size=3, stride=1)
     de3_5_0 = nn.BatchNorm2d(512)
     de3_5_1 = torch.nn.Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1))
     de3_5_2 = nn.BatchNorm2d(128)
