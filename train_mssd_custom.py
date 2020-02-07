@@ -14,7 +14,7 @@ import torch.utils.data as data
 # from data import VOCroot, COCOroot, VOC_300, VOC_512, VOC_320, VOC_300_1, VOC_300_2, COCO_300, COCO_512, \
 #     COCO_mobile_300, AnnotationTransform, COCODetection, VOCDetection, detection_collate, BaseTransform, preproc, \
 #     CUSTOMroot, CustomAnnotationTransform, CustomDetection
-from data import VOCroot, COCOroot, VOC_300, VOC_512, VOC_320, VOC_300_1, VOC_300_2, COCO_300, COCO_512, \
+from data import VOCroot, COCOroot, VOC_300, VOC_512_3, VOC_320, VOC_300_1, VOC_300_2, COCO_300, COCO_512, \
     COCO_mobile_300, AnnotationTransform, VOCDetection, detection_collate, BaseTransform, preproc, \
     CUSTOMroot, CustomAnnotationTransform, CustomDetection
 from layers.modules import MultiBoxLoss
@@ -241,11 +241,11 @@ def train():
     for iteration in range(start_iter, max_iter):
         if iteration % epoch_size == 0:
             # create batch iterator
-            image_size = ('300', '512')[random.randint(0,1)]
+            image_size = ('300', '512')[1]#[random.randint(0,1)]
             batch_iterator = iter(data.DataLoader((dataset, dataset_512)[image_size == '512'], batch_size,
                                                   shuffle=True, num_workers=args.num_workers,
                                                   collate_fn=detection_collate))
-            priorbox = PriorBox((VOC_300_2, VOC_512)[image_size == '512'])
+            priorbox = PriorBox((VOC_300_2, VOC_512_3)[image_size == '512'])
             priors = Variable(priorbox.forward(), volatile=True)
             loc_loss = 0
             conf_loss = 0
