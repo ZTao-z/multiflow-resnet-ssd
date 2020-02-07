@@ -402,6 +402,8 @@ class SSD(nn.Module):
                 sources.append(s5)
 
                 print(x.size(), ds3.size())
+                if x.size()[2] == 6:
+                    x = torch.nn.functional.interpolate(x, size=(4,4), mode='bilinear')
                 s3 = torch.cat((x, ds3), 1)
                 x3 = self.extras[32](s3)
 
