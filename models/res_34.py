@@ -335,14 +335,14 @@ class SSD(nn.Module):
                 #s38_2 = self.de10_38(x)
                 #s38_2=s38_1+s38_2
                 s38=torch.cat((s38,s38_1,xde38),1)
-                for k in range(len(self.vgg8)):
-                    s38 = self.vgg8[k](s38)
+                for i in range(len(self.vgg8)):
+                    s38 = self.vgg8[i](s38)
 
                 sources.append(s38)
                 ds5 = self.ds10_5(x)
                 xde19 = x
-                for k in range(len(self.de3)):
-                    xde19 = self.de3[k](xde19)
+                for i in range(len(self.de3)):
+                    xde19 = self.de3[i](xde19)
                 xde19 = ds19 + xde19
                 s19 = torch.cat((s19, ds19, xde19), 1)
                 s19 = self.extras[23](s19)
@@ -362,8 +362,8 @@ class SSD(nn.Module):
                 ds3 = self.ds5_3(x)
                 xde10 = x
 
-                for k in range(len(self.de2)):
-                    xde10 = self.de2[k](xde10)
+                for i in range(len(self.de2)):
+                    xde10 = self.de2[i](xde10)
                 xde10=xde10+ds10
                 s10 = torch.cat((s10, ds10,xde10), 1)
                 x10 = self.extras[26](s10)
@@ -378,8 +378,8 @@ class SSD(nn.Module):
             elif (k == 20):
 
                 xde5 = x
-                for k in range(len(self.de1)):
-                    xde5 = self.de1[k](xde5)
+                for i in range(len(self.de1)):
+                    xde5 = self.de1[i](xde5)
                 xde5=xde5+ds5
                 s5 = torch.cat((s5, ds5,xde5), 1)
 
@@ -438,19 +438,19 @@ class SSD(nn.Module):
 # https://github.com/pytorch/vision/blob/master/torchvision/models/vgg.py
 def vgg(cfg, i, batch_norm=False):
     layers = []
-    in_channels = i
-    for v in cfg:
-        if v == 'M':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-        elif v == 'C':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
-        else:
-            conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
-            if batch_norm:
-                layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
-            else:
-                layers += [conv2d, nn.ReLU(inplace=True)]
-            in_channels = v
+    # in_channels = i
+    # for v in cfg:
+    #     if v == 'M':
+    #         layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+    #     elif v == 'C':
+    #         layers += [nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True)]
+    #     else:
+    #         conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+    #         if batch_norm:
+    #             layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
+    #         else:
+    #             layers += [conv2d, nn.ReLU(inplace=True)]
+    #         in_channels = v
     pool5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
     conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
